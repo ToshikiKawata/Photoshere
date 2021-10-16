@@ -18,4 +18,7 @@
             </div>
         @endforeach
     </section>
+    <a href="{{ route('articles.create') }}" class="position-fixed fs-1 bottom-right-50">
+        <i class="fas fa-check"></i>
+    </a>
 @endsection
