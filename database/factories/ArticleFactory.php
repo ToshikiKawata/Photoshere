@@ -23,6 +23,9 @@ class ArticleFactory extends Factory
     {
         return [
             //
+            'caption' => $this->faker->word(),
+            'info' => $this->faker->paragraph(),
+            'user_id' => \App\Models\User::factory()->create(),
         ];
     }
 }
