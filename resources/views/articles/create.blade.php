@@ -1,8 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.main')
 @section('title', '新規登録')
 @section('content')
     <div class="col-8 col-offset-2 mx-auto">
         <h1>新規登録</h1>
+    @include('patial.flash')
+    @include('patial.errors')
         <form action="{{ route('articles.store') }}" method="post" enctype="multipart/form-data">
             <div class="card mb-3">
                 @csrf
@@ -14,11 +16,11 @@
                         </div>
                         <div class="mb-3">
                             <label for="caption" class="form-label">イメージの説明を入力してください</label>
-                            <input type="text" name="caption" id="caption" class="form-control">
+                            <input type="text" name="caption" id="caption" class="form-control" value="{{ old('caption') }}">
                         </div>
                         <div>
                             <label for="info" class="form-label">イメージの説明を入力してください</label>
-                            <textarea name="info" id="info" rows="5" class="form-control"></textarea>
+                            <textarea name="info" id="info" rows="5" class="form-control" value="{{ old('info') }}"></textarea>
                         </div>
                     </div>
                 </div>

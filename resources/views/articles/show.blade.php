@@ -1,7 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.main')
 @section('title', '詳細画面')
 @section('content')
     <h1>画像詳細</h1>
+    @include('patial.flash')
+    @include('patial.errors')
     <section>
         <article class="card shadow position-relative">
             <figure class="m-3">
@@ -25,5 +27,14 @@
                 <i class="fas fa-edit position-absolute top-0 end-0 fs-1"></i>
             </a>
         </article>
+        <div class="d-grid gap-3 col-6 mx-auto">
+            <form action="{{ route('articles.destroy', $article) }}" method="post" id="form">
+                @csrf
+                @method('DELETE')
+            </form>
+            <input form="form" type="submit" value="削除" onclick="if(!confirm('削除していいですか')){return false}"
+                class="btn btn-danger btn-lg">
+            <a href="{{ route('articles.index') }}" class="btn btn-secondary btn-lg">戻る</a>
+        </div>
     </section>
 @endsection
