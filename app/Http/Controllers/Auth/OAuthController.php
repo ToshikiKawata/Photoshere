@@ -21,28 +21,22 @@ class OAuthController extends Controller
     public function oauthCallback($provider)
     {
         try {
-            $sotialUser = Socialite::with($provider)->user();
-        } catch (\Throwable $th) {
-            return redirect('/login')->withErrors(['oauth' => '予期せぬエラーが発生しました']);
-        }
-        //dd($sotialUser);
-
-        // 認証情報が返ってこなかった場合はログイン画面にリダイレクト
-        try {
             $socialUser = Socialite::with($provider)->user();
-        } catch (\Exception $e) {
-            return redirect('/login')->withErrors(['oauth_error' => '予期せぬエラーが発生しました']);
+        } catch (\Throwable $th) {
+            // dd($th);
+            return redirect('/login')->withErrors(
+                ['oauth' => '予期せぬエラーが発生しました']
+            );
         }
 
-        // emailで検索してユーザーが見つかればそのユーザーを、見つからなければ新しいインスタンスを生成
-        $user = User::firstOrNew(['email' => $socialUser->getEmail()]);
+        $identityProvider = IdentityProvider::firstOrNew(['id' => $socialUser->getId(), 'name' => $provider]);
 
-        // ユーザーが認証済みか確認
-        if (!$user->exists) {
-            $user->name = $socialUser->getNickname() ?? $socialUser->name;
-            $identityProvider = new IdentityProvider([
-                'id' => $socialUser->getId(),
-                'name' => $provider
+        // 新規ユーザーの処理
+        if ($identityProvider->exists) {
+            $user = $identityProvider->user;
+        } else {
+            $user = new User([
+                'name' => $socialUser->getNickname() ?? $socialUser->name,
             ]);
 
             DB::beginTransaction();
@@ -51,14 +45,13 @@ class OAuthController extends Controller
                 $user->identityProvider()->save($identityProvider);
                 DB::commit();
             } catch (\Exception $e) {
-                DB::rollBack();
+                DB::rollback();
                 return redirect()
                     ->route('login')
                     ->withErrors(['transaction_error' => '保存に失敗しました']);
             }
         }
 
-        // ログイン
         Auth::login($user);
 
         return redirect(RouteServiceProvider::HOME);
