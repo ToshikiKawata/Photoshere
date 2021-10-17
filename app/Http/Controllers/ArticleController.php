@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
+    public function __construct()
+    {
+        // アクションに合わせたpolicyのメソッドで認可されていないユーザーはエラーを投げる
+        $this->authorizeResource(Article::class, 'article');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -42,7 +47,7 @@ class ArticleController extends Controller
     {
         $article = new Article($request->all());
 
-        $article->user_id = 1;
+        $article->user_id = $request->user()->id;
 
         $file = $request->file('file');
 
@@ -96,6 +101,7 @@ class ArticleController extends Controller
      */
     public function edit(Article $article)
     {
+        //$this->authorize('update', $article);
         return view('articles.edit', compact('article'));
     }
 
@@ -109,6 +115,7 @@ class ArticleController extends Controller
     public function update(ArticleRequest $request, Article $article)
     {
         //dd($request);
+        //$this->authorize('update', $article);
         $article->fill($request->all());
 
         try {
@@ -131,12 +138,13 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        //$this->authorize('delete', $article);
         $path = $article->image_path;
         DB::beginTransaction();
         try {
             $article->delete();
             $article->Attachment()->delete();
-            if(!Storage::delete($path)) {
+            if (!Storage::delete($path)) {
                 throw new Exeption('ファイルの削除に失敗しました');
             }
             DB::commit();
